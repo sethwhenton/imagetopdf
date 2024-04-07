@@ -1,6 +1,5 @@
 import os
 from tkinter import Tk, Button, filedialog, messagebox, Label, StringVar, LEFT, RIGHT, TOP, BOTTOM, BOTH
-
 from PIL import Image, ImageTk
 
 class ImageToPdfConverter:
@@ -10,23 +9,36 @@ class ImageToPdfConverter:
         self.master = master
         master.title("Image to PDF Converter")
 
+        # Set color scheme
+        primary_color = "#990F02"  # Red
+        secondary_color = "#FFFFFF"  # White
+        tertiary_color = "#000000"  # Black
+
         # Center the window
         window_width = 400
-        window_height = 400
+        window_height = 500  # Increased height to accommodate the preview label
         screen_width = master.winfo_screenwidth()
         screen_height = master.winfo_screenheight()
         x_position = (screen_width - window_width) // 2
         y_position = (screen_height - window_height) // 2
         master.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
 
-        # Left side (file details)
-        self.file_details_var = StringVar()
-        self.file_details_label = Label(master, textvariable=self.file_details_var, anchor="w", justify=LEFT)
-        self.file_details_label.pack(side=LEFT, fill=BOTH, expand=True, padx=20, pady=20)
+        # Preview label for the selected image
+        self.preview_label = Label(master, bg=secondary_color, fg=tertiary_color)
+        self.preview_label.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
 
-        # Right side (single button)
-        self.single_button = Button(master, text="Upload Image", command=self.upload_or_choose_or_convert)
-        self.single_button.pack(side=RIGHT, padx=10, pady=10)
+        # Middle side (single button)
+        self.single_button = Button(master, text="Upload Image", command=self.upload_or_choose_or_convert, bg=primary_color, fg=secondary_color, width=20, height=4)
+        self.single_button.pack(padx=10, pady=10)
+
+        # Bottom side (file details)
+        self.file_details_var = StringVar()
+        self.file_details_label = Label(master, textvariable=self.file_details_var, anchor="w", justify=LEFT, bg=secondary_color, fg=tertiary_color)
+        self.file_details_label.pack(side=BOTTOM, expand=True, padx=20, pady=20)
+
+        
+
+        
 
         # Step variables
         self.image_uploaded = False
@@ -47,6 +59,7 @@ class ImageToPdfConverter:
             self.image_path = file_path
             self.original_filename = os.path.basename(file_path)
             self.update_file_details()
+            self.update_preview()
             self.image_uploaded = True
             self.destination_selected = False
             self.single_button.config(text="Select Destination")
@@ -58,6 +71,14 @@ class ImageToPdfConverter:
             file_type = f"File Type: {self.image_path.split('.')[-1]}\n"
             file_location = f"File Location: {os.path.dirname(self.image_path)}"
             self.file_details_var.set(file_name + file_size + file_type + file_location)
+
+    def update_preview(self):
+        if self.image_path:
+            image = Image.open(self.image_path)
+            image.thumbnail((300, 300))
+            photo = ImageTk.PhotoImage(image)
+            self.preview_label.configure(image=photo)
+            self.preview_label.image = photo
 
     def choose_destination(self):
         self.destination_directory = filedialog.askdirectory(title="Select Destination Directory")
@@ -100,6 +121,7 @@ class ImageToPdfConverter:
 
         # Clear file information display
         self.file_details_var.set("")
+        self.preview_label.configure(image="")
         self.single_button.config(text="Upload Image")
 
 if __name__ == "__main__":
